@@ -17,13 +17,14 @@ android {
     targetSdk = 36
     versionCode = 1
     versionName = "1.0"
+
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   buildTypes {
     release {
-      isMinifyEnabled = false
       isCrunchPngs = false
+      isMinifyEnabled = false
 
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -32,7 +33,7 @@ android {
     }
 
     debug {
-      // keep clean for CI (no signing, no firebase requirements)
+      // IMPORTANT: no custom signingConfig (fixes GitHub Actions crash)
     }
   }
 
@@ -58,6 +59,7 @@ secrets {
 
 dependencies {
   implementation(platform(libs.androidx.compose.bom))
+  implementation(platform(libs.firebase.bom))
 
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.compose.material.icons.core)
@@ -82,10 +84,8 @@ dependencies {
 
   implementation(libs.converter.moshi)
   implementation(libs.generativeai)
-
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
-
   implementation(libs.logging.interceptor)
   implementation(libs.moshi.kotlin)
   implementation(libs.okhttp)
@@ -93,6 +93,7 @@ dependencies {
 
   testImplementation(libs.junit)
   testImplementation(libs.androidx.junit)
+  testImplementation(libs.androidx.core)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)
   testImplementation(libs.roborazzi)
@@ -105,6 +106,7 @@ dependencies {
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.runner)
 
+  debugImplementation(libs.androidx.compose.ui.test.manifest)
   debugImplementation(libs.androidx.compose.ui.tooling)
 
   ksp(libs.androidx.room.compiler)
