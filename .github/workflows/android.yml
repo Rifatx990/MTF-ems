@@ -1,4 +1,4 @@
-name: Android Production Release (APK + AAB)
+name: Production Android Build
 
 on:
   push:
@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
@@ -22,62 +19,20 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Verify project structure
+        run: ls -R
 
-      # -----------------------------
-      # MAKE GRADLE EXECUTABLE
-      # -----------------------------
-      - name: Grant execute permission
-        run: chmod +x gradlew
+      - name: Build APK (system Gradle fallback)
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew :app:assembleDebug
+          else
+            gradle :app:assembleDebug
+          fi
 
-      # -----------------------------
-      # CLEAN BUILD
-      # -----------------------------
-      - name: Clean project
-        run: ./gradlew clean
-
-      # -----------------------------
-      # BUILD APK (DEBUG)
-      # -----------------------------
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug
-
-      # -----------------------------
-      # BUILD RELEASE APK
-      # -----------------------------
-      - name: Build Release APK
-        run: ./gradlew :app:assembleRelease
-
-      # -----------------------------
-      # BUILD AAB (PLAY STORE)
-      # -----------------------------
-      - name: Build Release AAB
-        run: ./gradlew :app:bundleRelease
-
-      # -----------------------------
-      # UPLOAD ARTIFACTS
-      # -----------------------------
-      - name: Upload APK & AAB
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-builds
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
-
-      # -----------------------------
-      # CREATE GITHUB RELEASE
-      # -----------------------------
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
-          files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          name: debug-apk
+          name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
