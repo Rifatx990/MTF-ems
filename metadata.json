@@ -1,0 +1,6 @@
+{
+  "name": "মেহেদী টেইলার্স & ফেব্রিক্স",
+  "description": "A comprehensive tailor management system for Mehedi Tailors & Fabrics, featuring order tracking, worker management, and reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
