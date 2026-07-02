@@ -1,4 +1,4 @@
-name: Android Production Build
+name: Production Android Build
 
 on:
   push:
@@ -22,15 +22,17 @@ jobs:
       - name: Verify project structure
         run: ls -R
 
-      - name: Grant permission to gradlew
-        run: chmod +x gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug
+      - name: Build APK (system Gradle fallback)
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew :app:assembleDebug
+          else
+            gradle :app:assembleDebug
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk          name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
