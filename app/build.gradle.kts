@@ -2,10 +2,9 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.google.devtools.ksp)
+  alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
-  alias(libs.plugins.google.services)
-  kotlin("plugin.serialization") version "2.2.10"
 }
 
 android {
@@ -13,7 +12,7 @@ android {
   compileSdk = 36
 
   defaultConfig {
-    applicationId = "com.aistudio.tailormanager.kzmxpt"
+    applicationId = "com.aistudio.meheditailors.abcde"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
@@ -23,23 +22,17 @@ android {
 
   buildTypes {
     release {
-      isCrunchPngs = false
       isMinifyEnabled = false
+      isCrunchPngs = false
 
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
       )
-
-      // SAFE: only used if secrets exist
-      val keystorePath = System.getenv("KEYSTORE_PATH")
-      if (keystorePath != null) {
-        signingConfig = signingConfigs.getByName("release")
-      }
     }
 
     debug {
-      // IMPORTANT: no custom signing (CI-safe)
+      // keep clean for CI (no signing, no firebase requirements)
     }
   }
 
@@ -56,18 +49,6 @@ android {
   testOptions {
     unitTests.isIncludeAndroidResources = true
   }
-
-  signingConfigs {
-    create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: ""
-      if (keystorePath.isNotEmpty()) {
-        storeFile = file(keystorePath)
-        storePassword = System.getenv("STORE_PASSWORD")
-        keyAlias = "upload"
-        keyPassword = System.getenv("KEY_PASSWORD")
-      }
-    }
-  }
 }
 
 secrets {
@@ -77,7 +58,6 @@ secrets {
 
 dependencies {
   implementation(platform(libs.androidx.compose.bom))
-  implementation(platform(libs.firebase.bom))
 
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.compose.material.icons.core)
@@ -92,18 +72,19 @@ dependencies {
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
+
   implementation(libs.androidx.navigation.compose)
+
+  implementation(libs.kotlinx.serialization.json)
 
   implementation(libs.androidx.room.ktx)
   implementation(libs.androidx.room.runtime)
 
   implementation(libs.converter.moshi)
-  implementation(libs.firebase.ai)
-  implementation(libs.firebase.appcheck.recaptcha)
+  implementation(libs.generativeai)
 
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
   implementation(libs.logging.interceptor)
   implementation(libs.moshi.kotlin)
@@ -112,15 +93,20 @@ dependencies {
 
   testImplementation(libs.junit)
   testImplementation(libs.androidx.junit)
-  testImplementation(libs.androidx.core)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.roborazzi)
+  testImplementation(libs.roborazzi.compose)
+  testImplementation(libs.roborazzi.junit.rule)
 
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)
   androidTestImplementation(libs.androidx.espresso.core)
+  androidTestImplementation(libs.androidx.junit)
+  androidTestImplementation(libs.androidx.runner)
 
   debugImplementation(libs.androidx.compose.ui.tooling)
 
-  // FIXED KSP SYNTAX
   ksp(libs.androidx.room.compiler)
   ksp(libs.moshi.kotlin.codegen)
 }
